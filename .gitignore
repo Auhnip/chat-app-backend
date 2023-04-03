@@ -1,0 +1,13 @@
+/node_modules
+/dist
+
+# VS Code Thunder client plugin configurations
+/thunder-tests
+
+/node.md
+
+*.log
+
+# 仅包含默认配置文件
+/config/**
+!/config/default.*

@@ -1,0 +1,46 @@
+{
+  "rabbitmq": {
+    "host": "localhost",
+    "port": 5672
+  },
+
+  "mysql": {
+    "host": "localhost",
+    "port": 3306,
+    "user": "root",
+    "password": "",
+    "database": "chat"
+  },
+
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "password": ""
+  },
+
+  "jwtToken": {
+    "secret": "",
+    "algorithm": "HS256"
+  },
+
+  "mail": {
+    "host": "mailhost",
+    "port": 465,
+    "secure": true,
+    "auth": {
+      "user": "someone@mail.com",
+      "pass": "authorization code"
+    }
+  },
+
+  "verificationCode": {
+    "mailSubject": "Verify your email",
+    "length": 6,
+    "expiresInSecond": 300
+  },
+
+  "log": {
+    "level": "DEBUG",
+    "maxFileSize": "1M"
+  }
+}
