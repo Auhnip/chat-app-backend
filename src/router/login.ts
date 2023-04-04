@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import Joi from 'joi';
 import UserService from '../service/user';
-import responseWrapper from '../util/response_wrapper';
+import { StatusError, responseWrapper } from '../util/response_wrapper';
 import { generateAccessToken, generateRefreshToken } from '../util/token';
 import { User } from 'request/data';
 import { passwordSchema, userIdSchema } from '../schemas/user';
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
 
   // 不存在该用户或该用户密码错误
   if (!password || password !== user.password) {
-    throw new Error('wrong user name or password');
+    throw new StatusError('wrong user name or password', 'params invalid');
   }
 
   // 验证通过

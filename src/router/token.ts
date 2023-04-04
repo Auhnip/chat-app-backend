@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Joi from 'joi';
-import responseWrapper from '../util/response_wrapper';
+import { StatusError, responseWrapper } from '../util/response_wrapper';
 import { generateAccessToken, verifyToken } from '../util/token';
 
 const router = Router();
@@ -35,7 +35,7 @@ router.post('/refresh', async (req, res) => {
   const { grantType, userId } = await verifyToken(refreshToken);
 
   if (grantType !== 'refresh') {
-    throw new Error('token type error');
+    throw new StatusError('token type error', 'params invalid');
   }
 
   const accessToken = generateAccessToken(userId);

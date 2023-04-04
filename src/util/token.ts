@@ -49,16 +49,7 @@ export function generateRefreshToken(userId: string): string {
 export async function verifyToken(token: string) {
   const decoded = jwt.verify(token, JWT_SECRET);
 
-  try {
-    const payload = await payloadSchema.validateAsync(decoded);
+  const payload = await payloadSchema.validateAsync(decoded);
 
-    return payload;
-    // 更改错误类型
-  } catch (err: any) {
-    if (err.name === 'ValidationError') {
-      throw new Error('token format error');
-    }
-
-    throw err;
-  }
+  return payload;
 }

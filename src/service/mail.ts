@@ -1,5 +1,6 @@
 import nodemailer, { type SendMailOptions } from 'nodemailer';
 import Config from '../util/config';
+import { StatusError } from '../util/response_wrapper';
 
 const {
   mail: mailConnection,
@@ -41,7 +42,7 @@ const verificationCodeSender = async (mailTo: string, code: string) => {
   const info = await transporter.sendMail(data);
 
   if (info.accepted.length === 0) {
-    throw new Error('No one accepted mail');
+    throw new StatusError('No one accepted mail', 'internal error');
   }
 };
 

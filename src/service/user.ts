@@ -1,5 +1,4 @@
 import Database from '../util/database';
-import { DatabaseAccessError } from '../util/custom_error';
 import { UserData } from 'knex/types/tables';
 
 class UserService {
@@ -13,14 +12,19 @@ class UserService {
         }
 
         return result[0].user_password;
-      })
-      .catch((reason) => {
-        throw new DatabaseAccessError('database access error', reason);
       });
   }
 
   static async addUser(user: UserData) {
     return await Database.from('user').insert(user);
+  }
+
+  static async hasEmail(email: UserData['user_email']) {
+    const emailEquals = await Database.from('user')
+      .select('user_email')
+      .where('user_email', email);
+
+    return emailEquals.length === 1;
   }
 }
 

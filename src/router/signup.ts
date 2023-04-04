@@ -12,8 +12,9 @@ import { UserData } from 'knex/types/tables';
 import { getRandomVerificationCode } from '../util/utils';
 import redis from '../util/redis';
 import Config from '../util/config';
-import responseWrapper from '../util/response_wrapper';
+import { StatusError, responseWrapper } from '../util/response_wrapper';
 import UserService from '../service/user';
+import logger from '../util/logger';
 
 const router = Router();
 
@@ -40,6 +41,13 @@ router.post('/verify/email', async (req, res) => {
     req.body
   );
 
+  if (await UserService.hasEmail(email)) {
+    throw new StatusError(
+      `The email address ${email} has already been registered`,
+      'params invalid'
+    );
+  }
+
   // 获取验证码相关配置
   const { verificationCode } = Config;
 
@@ -50,7 +58,11 @@ router.post('/verify/email', async (req, res) => {
   await verificationCodeSender(email, code);
 
   // 将邮箱与验证码存入 redis
-  redis.set(email, code, 'EX', verificationCode.expiresInSecond);
+  await redis.set(email, code, 'EX', verificationCode.expiresInSecond);
+
+  logger.info(
+    `The verification Code for '${email}' has been set to: '${code}'`
+  );
 
   res.json(responseWrapper('success'));
 });
@@ -63,7 +75,7 @@ router.post('/', async (req, res) => {
 
   // 检查验证码是否正确
   if (verifyCode !== form.code) {
-    throw new Error('incorrect verification code');
+    throw new StatusError('incorrect verification code', 'params invalid');
   }
 
   const user: UserData = {
@@ -76,7 +88,11 @@ router.post('/', async (req, res) => {
   await UserService.addUser(user);
 
   // 删除验证码缓存
-  await redis.del(form.email)
+  await redis.del(form.email);
+
+  logger.info(
+    `User successfully registered: [${user.user_id}], [${user.user_email}]`
+  );
 
   res.json(responseWrapper('success'));
 });
