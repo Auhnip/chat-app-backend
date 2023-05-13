@@ -3,8 +3,11 @@ import type { Algorithm } from 'jsonwebtoken';
 
 type Config = {
   rabbitmq: {
-    host: string;
+    hostname: string;
     port: number;
+    username: string;
+    password: string;
+    vhost: string;
   };
 
   mysql: {
@@ -45,6 +48,7 @@ type Config = {
   log: {
     level: string;
     maxFileSize: string | number;
+    fileNumber: number;
   };
 };
 

@@ -8,9 +8,12 @@ import { unless } from 'express-unless';
 import Config from '../util/config';
 import { payloadSchema } from '../util/token';
 
+const startBy = (paths: string[]) =>
+  paths.map((path) => new RegExp(`^\\/${path}(\\/\\w*)*$`));
+
 // 不适用 jwt 验证的路由
 const unlessOptions = {
-  path: [/^\/signup(\/[\w])*/, '/login', /^\/token(\/[\w])*$/, '/ws'],
+  path: startBy(['signup', 'login', 'token', 'ws']),
 };
 
 // 验证 token 是否有效

@@ -7,18 +7,51 @@ declare module 'knex/types/tables' {
     user_email: string;
   }
 
-  interface Tables {
-    // This is same as specifying `knex<User>('users')`
-    // blogs: Blogs;
+  interface GroupData {
+    group_id: number;
+    group_name: string;
+    group_description: string;
+    group_owner: string;
+    group_created_at: Date;
+  }
 
+  interface FriendsData {
+    friends_id: number;
+    friends_user_id_1: string;
+    friends_user_id_2: string;
+    friends_status: 'AGREED' | 'REJECTED' | 'WAITING';
+    friends_request_time: Date;
+    friends_response_time: Date;
+  }
+
+  interface GroupMessageData {
+    group_msg_id: number;
+    group_msg_group_id: number;
+    group_msg_sender: string;
+    group_msg_sent_at: Date;
+    group_msg_content: string;
+  }
+
+  interface PrivateMessageData {
+    private_msg_id: number;
+    private_msg_sender: string;
+    private_msg_receiver: string;
+    private_msg_sent_at: Date;
+    private_msg_content: string;
+  }
+
+  interface GroupMembersData {
+    group_members_group_id: number;
+    group_members_user_id: string;
+    group_members_status: 'JOINED' | 'WAITING' | 'REJECTED';
+    group_members_nickname: string;
+    group_members_request_time: Date;
+    group_members_joined_at: Date;
+  }
+
+  interface Tables {
     // For more advanced types, you can specify separate type
     // for base model, "insert" type and "update" type.
-    // But first: notice that if you choose to use this,
-    // the basic typing showed above can be ignored.
-    // So, this is like specifying
-    //    knex
-    //    .insert<{ name: string }>({ name: 'name' })
-    //    .into<{ name: string, id: number }>('users')
     ['user']: Knex.CompositeTableType<
       // This interface will be used for return type and
       // `where`, `having` etc where full type is required
@@ -45,6 +78,55 @@ declare module 'knex/types/tables' {
       // will still work.
       // Defaults to Partial "insert" type
       Partial<UserData>
+    >;
+
+    ['group']: Knex.CompositeTableType<
+      GroupData,
+      Omit<GroupData, 'group_id'>,
+      Partial<Omit<GroupData, 'group_id'>>
+    >;
+
+    ['friends']: Knex.CompositeTableType<
+      FriendsData,
+      Omit<
+        FriendsData,
+        'friends_id' | 'friends_response_time' | 'friends_status'
+      > & { friends_status: 'WAITING' },
+      Pick<FriendsData, 'friends_status' | 'friends_response_time'>
+    >;
+
+    ['private_message']: Knex.CompositeTableType<
+      PrivateMessageData,
+      Omit<PrivateMessageData, 'private_msg_id'>,
+      {}
+    >;
+
+    ['group_message']: Knex.CompositeTableType<
+      GroupMessageData,
+      Omit<GroupMessageData, 'group_msg_id'>,
+      {}
+    >;
+
+    ['group_members']: Knex.CompositeTableType<
+      GroupMembersData,
+      Omit<
+        GroupMembersData,
+        'group_members_nickname' | 'group_members_joined_at'
+      > &
+        Partial<
+          Pick<
+            GroupMembersData,
+            'group_members_nickname' | 'group_members_joined_at'
+          >
+        >,
+      Partial<
+        Pick<
+          GroupMembersData,
+          | 'group_members_status'
+          | 'group_members_nickname'
+          | 'group_members_joined_at'
+        >
+      >
     >;
   }
 }

@@ -78,20 +78,14 @@ router.post('/', async (req, res) => {
     throw new StatusError('incorrect verification code', 'params invalid');
   }
 
-  const user: UserData = {
-    user_id: form.userId,
-    user_password: form.password,
-    user_email: form.email,
-  };
-
   // 向数据库添加用户
-  await UserService.addUser(user);
+  await UserService.addUser(form);
 
   // 删除验证码缓存
   await redis.del(form.email);
 
   logger.info(
-    `User successfully registered: [${user.user_id}], [${user.user_email}]`
+    `User successfully registered: [${form.userId}], [${form.email}]`
   );
 
   res.json(responseWrapper('success'));

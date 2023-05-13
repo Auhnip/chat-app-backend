@@ -1,7 +1,10 @@
 {
   "rabbitmq": {
-    "host": "localhost",
-    "port": 5672
+    "hostname": "localhost",
+    "port": 5672,
+    "username": "",
+    "password": "",
+    "vhost": "/"
   },
 
   "mysql": {
@@ -41,6 +44,7 @@
 
   "log": {
     "level": "DEBUG",
-    "maxFileSize": "1M"
+    "maxFileSize": "1M",
+    "fileNumber": 3
   }
 }
