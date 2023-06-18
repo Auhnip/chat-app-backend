@@ -2,7 +2,7 @@
  * @Author       : wqph
  * @Date         : 2023-05-09 18:29:59
  * @LastEditors  : wqph auhnipuiq@163.com
- * @LastEditTime : 2023-05-12 23:13:49
+ * @LastEditTime : 2023-06-02 19:20:19
  * @FilePath     : \backend\src\service\connection.ts
  * @Description  : 与客户端的连接服务
  */
@@ -31,6 +31,8 @@ const ConnectionService = {
 
       await channel.assertQueue(userId, { durable: true });
 
+      const lastReadHistory = await MessageService.getLastReadTime(userId);
+
       const { consumerTag } = await channel.consume(userId, async (message) => {
         if (!message) {
           logger.info('Received empty message');
@@ -43,6 +45,11 @@ const ConnectionService = {
           key === 'sendAt' ? new Date(value) : value
         ) as PrivateMessage | GroupMessage;
 
+        // 消息已经被拉取过，不需要传输给用户
+        if (content.sendAt < lastReadHistory) {
+          return;
+        }
+
         logger.info(
           `User [${userId}] received message: \n${JSON.stringify(
             content,
@@ -50,8 +57,6 @@ const ConnectionService = {
             2
           )}`
         );
-
-        await MessageService.addMessageToRecords(content);
 
         // 推送消息到客户端
         wsConnection.send(JSON.stringify(content));

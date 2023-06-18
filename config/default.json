@@ -21,6 +21,14 @@
     "password": ""
   },
 
+  "minio": {
+    "endPoint": "localhost",
+    "port": 9000,
+    "useSSL": false,
+    "accessKey": "userId",
+    "secretKey": "password"
+  },
+
   "jwtToken": {
     "secret": "",
     "algorithm": "HS256"

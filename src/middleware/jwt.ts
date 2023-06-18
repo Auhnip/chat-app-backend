@@ -6,7 +6,7 @@ import {
 } from 'express-jwt';
 import { unless } from 'express-unless';
 import Config from '../util/config';
-import { payloadSchema } from '../util/token';
+import { payloadSchema } from '../service/token';
 
 const startBy = (paths: string[]) =>
   paths.map((path) => new RegExp(`^\\/${path}(\\/\\w*)*$`));

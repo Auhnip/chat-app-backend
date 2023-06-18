@@ -2,7 +2,7 @@
  * @Author       : wqph
  * @Date         : 2023-05-10 19:49:46
  * @LastEditors  : wqph auhnipuiq@163.com
- * @LastEditTime : 2023-05-12 22:58:09
+ * @LastEditTime : 2023-05-18 21:06:28
  * @FilePath     : \backend\src\router\message.ts
  * @Description  : 消息发送路由
  */
@@ -11,7 +11,7 @@ import Joi from 'joi';
 import { userIdSchema } from '../schemas/user';
 import { Response, Router } from 'express';
 import { Request as JWTRequest } from 'express-jwt';
-import { PayloadType } from '../util/token';
+import { PayloadType } from '../service/token';
 import { responseWrapper } from '../util/response_wrapper';
 import MessageService from '../service/message';
 import { validMessageRecordsHistoryDateRange } from '../util/utils';
@@ -53,7 +53,7 @@ interface RequestType {
 }
 
 const requestSchema = {
-  ['/send']: Joi.alternatives<RequestType['/send']>().try(
+  '/send': Joi.alternatives<RequestType['/send']>().try(
     Joi.object({
       type: Joi.string().valid('group').required(),
       to: Joi.number().required(),
@@ -67,7 +67,7 @@ const requestSchema = {
       sendAt: Joi.date().required(),
     })
   ),
-  ['/history']: Joi.object<RequestType['/history']>({
+  '/history': Joi.object<RequestType['/history']>({
     startBefore: Joi.number()
       .valid(...validMessageRecordsHistoryDateRange)
       .required(),
@@ -104,9 +104,12 @@ router.post('/history', async (req: JWTRequest, res: Response) => {
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - startBefore);
 
-  const messages = await MessageService.getMessageRecordsAfter(userId, startDate);
+  const messages = await MessageService.getMessageRecordsAfter(
+    userId,
+    startDate
+  );
 
-  res.json(responseWrapper('success', messages))
+  res.json(responseWrapper('success', { userId, messages }));
 });
 
 export default router;

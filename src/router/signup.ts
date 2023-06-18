@@ -8,13 +8,14 @@ import {
   verificationCodeSchema,
 } from '../schemas/user';
 import { User } from 'request/data';
-import { UserData } from 'knex/types/tables';
 import { getRandomVerificationCode } from '../util/utils';
-import redis from '../util/redis';
+import redis from '../service/base/redis';
 import Config from '../util/config';
 import { StatusError, responseWrapper } from '../util/response_wrapper';
 import UserService from '../service/user';
 import logger from '../util/logger';
+import amqp from 'amqplib';
+import configuration from '../util/config';
 
 const router = Router();
 
@@ -32,6 +33,7 @@ const requestSchema = {
     password: passwordSchema.required(),
     email: emailSchema.required(),
     code: verificationCodeSchema.required(),
+    createdAt: Joi.date().required(),
   }),
 };
 
@@ -74,12 +76,21 @@ router.post('/', async (req, res) => {
   const verifyCode = await redis.get(form.email);
 
   // 检查验证码是否正确
-  if (verifyCode !== form.code) {
+  if (verifyCode?.toLowerCase() !== form.code.toLowerCase()) {
     throw new StatusError('incorrect verification code', 'params invalid');
   }
 
   // 向数据库添加用户
   await UserService.addUser(form);
+
+  // 声明对应的消息队列
+  const connection = await amqp.connect(configuration.rabbitmq);
+  const channel = await connection.createChannel();
+
+  await channel.assertQueue(form.userId, { durable: true });
+
+  await channel.close();
+  await connection.close();
 
   // 删除验证码缓存
   await redis.del(form.email);

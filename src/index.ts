@@ -2,7 +2,7 @@
  * @Author       : wqph
  * @Date         : 2023-03-14 17:47:04
  * @LastEditors  : wqph auhnipuiq@163.com
- * @LastEditTime : 2023-05-11 21:53:10
+ * @LastEditTime : 2023-06-01 14:42:58
  * @FilePath     : \backend\src\index.ts
  * @Description  : 项目启动文件
  */
@@ -15,8 +15,11 @@ import expressWs from 'express-ws';
 import loginRouter from './router/login';
 import signupRouter from './router/signup';
 import userRouter from './router/user';
+import groupRouter from './router/group';
 import tokenRouter from './router/token';
 import messageRouter from './router/message';
+import publicRouter from './router/public';
+import friendsRouter from './router/friends';
 
 import { JwtVerifier, PayloadVerifier } from './middleware/jwt';
 import ErrorHandler from './middleware/error_handler';
@@ -31,7 +34,7 @@ app.use(requestLogger);
 import wsRouter from './router/ws';
 import logger from './util/logger';
 import ConnectionService from './service/connection';
-import redis from './util/redis';
+import redis from './service/base/redis';
 // 由于 websocket 的特殊性，其不需要跨域处理
 // 也不使用请求头的 JWT 验证
 app.use('/ws', wsRouter);
@@ -51,8 +54,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/login', loginRouter);
 app.use('/signup', signupRouter);
 app.use('/user', userRouter);
+app.use('/group', groupRouter);
 app.use('/token', tokenRouter);
 app.use('/message', messageRouter);
+app.use('/public', publicRouter);
+app.use('/friends', friendsRouter);
 
 // 错误处理
 app.use(ErrorHandler);

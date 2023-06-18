@@ -24,6 +24,14 @@ type Config = {
     password: string;
   };
 
+  minio: {
+    endPoint: string;
+    port: number;
+    useSSL: boolean;
+    accessKey: string;
+    secretKey: string;
+  };
+
   jwtToken: {
     secret: string;
     algorithm: Algorithm;

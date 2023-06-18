@@ -1,7 +1,7 @@
 import Redis, { RedisOptions } from 'ioredis';
 
-import Config from './config';
-import logger from './logger';
+import Config from '../../util/config';
+import logger from '../../util/logger';
 
 const { redis: redisConfig } = Config;
 

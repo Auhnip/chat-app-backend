@@ -6,4 +6,4 @@ export const emailSchema = Joi.string().pattern(
   /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]+$/
 );
 
-export const verificationCodeSchema = Joi.string().pattern(/^[A-Z0-9]{6}$/);
+export const verificationCodeSchema = Joi.string().pattern(/^[a-zA-Z0-9]{6}$/);

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import Joi from 'joi';
 import UserService from '../service/user';
 import { StatusError, responseWrapper } from '../util/response_wrapper';
-import { generateAccessToken, generateRefreshToken } from '../util/token';
+import { generateAccessToken, generateRefreshToken } from '../service/token';
 import { User } from 'request/data';
 import { passwordSchema, userIdSchema } from '../schemas/user';
 

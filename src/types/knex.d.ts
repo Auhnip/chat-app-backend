@@ -5,14 +5,17 @@ declare module 'knex/types/tables' {
     user_id: string;
     user_password: string;
     user_email: string;
+    user_created_at: Date;
+    user_avatar: string | null;
   }
 
   interface GroupData {
     group_id: number;
     group_name: string;
-    group_description: string;
+    group_description: string | null;
     group_owner: string;
     group_created_at: Date;
+    group_avatar: string | null;
   }
 
   interface FriendsData {
@@ -25,7 +28,7 @@ declare module 'knex/types/tables' {
   }
 
   interface GroupMessageData {
-    group_msg_id: number;
+    group_msg_id: string;
     group_msg_group_id: number;
     group_msg_sender: string;
     group_msg_sent_at: Date;
@@ -47,6 +50,12 @@ declare module 'knex/types/tables' {
     group_members_nickname: string;
     group_members_request_time: Date;
     group_members_joined_at: Date;
+  }
+
+  interface ReadStatusData {
+    read_status_id: number;
+    read_status_user_id: string;
+    read_status_last_read: Date;
   }
 
   interface Tables {
@@ -82,7 +91,7 @@ declare module 'knex/types/tables' {
 
     ['group']: Knex.CompositeTableType<
       GroupData,
-      Omit<GroupData, 'group_id'>,
+      Omit<GroupData, 'group_id' | 'group_avatar'>,
       Partial<Omit<GroupData, 'group_id'>>
     >;
 
@@ -92,7 +101,12 @@ declare module 'knex/types/tables' {
         FriendsData,
         'friends_id' | 'friends_response_time' | 'friends_status'
       > & { friends_status: 'WAITING' },
-      Pick<FriendsData, 'friends_status' | 'friends_response_time'>
+      Partial<
+        Pick<
+          FriendsData,
+          'friends_status' | 'friends_response_time' | 'friends_request_time'
+        >
+      >
     >;
 
     ['private_message']: Knex.CompositeTableType<
@@ -127,6 +141,12 @@ declare module 'knex/types/tables' {
           | 'group_members_joined_at'
         >
       >
+    >;
+
+    ['read_status']: Knex.CompositeTableType<
+      ReadStatusData,
+      Omit<ReadStatusData, 'read_status_id'>,
+      Pick<ReadStatusData, 'read_status_last_read'>
     >;
   }
 }

@@ -2,7 +2,7 @@
  * @Author       : wqph
  * @Date         : 2023-05-09 18:27:35
  * @LastEditors  : wqph auhnipuiq@163.com
- * @LastEditTime : 2023-05-12 01:29:33
+ * @LastEditTime : 2023-06-05 00:57:12
  * @FilePath     : \backend\src\service\message.ts
  * @Description  : 消息收发服务
  */
@@ -16,7 +16,7 @@ import {
   PrivateMessageData,
   UserData,
 } from 'knex/types/tables';
-import Database from '../util/database';
+import Database from './base/database';
 
 interface MessageBase {
   from: string;
@@ -77,6 +77,7 @@ const groupMessageParser = ({
 const MessageService = {
   /**
    * 发送群聊消息
+   *
    * @param {GroupMessage} message 待发送的消息
    * @return {Promise<void>}
    */
@@ -84,6 +85,8 @@ const MessageService = {
     logger.info(
       `Sending group message: [${message.from} -> ${message.to}: ${message.sendAt}]\n${message.content}`
     );
+
+    await this.addMessageToRecords(message);
 
     const messageQueue = await amqp.connect(configuration.rabbitmq);
     const channel = await messageQueue.createChannel();
@@ -104,6 +107,7 @@ const MessageService = {
 
   /**
    * 发送私聊消息
+   *
    * @param {PrivateMessage} message 待发送的消息
    * @return {Promise<void>}
    */
@@ -111,6 +115,8 @@ const MessageService = {
     logger.info(
       `Sending private message: [${message.from} -> ${message.to}: ${message.sendAt}]\n${message.content}`
     );
+
+    await this.addMessageToRecords(message);
 
     const messageQueue = await amqp.connect(configuration.rabbitmq);
     const channel = await messageQueue.createChannel();
@@ -133,6 +139,7 @@ const MessageService = {
 
   /**
    * 获取某个用户在特定时间往后的所有消息记录，按时间排序
+   *
    * @param {UserData['user_id']} userId 该用户的 ID
    * @param {Date} startDate 需要被提取的消息记录的起始时间
    * @return {Promise<(PrivateMessage | GroupMessage)[]>} 查询得到的所有消息记录，按照时间排序
@@ -157,6 +164,11 @@ const MessageService = {
       .orderBy('private_msg_sent_at', 'asc');
 
     const groupMessageRecords = await Database.from('group_message')
+      .join(
+        'group_members',
+        'group_members.group_members_group_id',
+        'group_message.group_msg_group_id'
+      )
       .column(
         'group_msg_sender',
         'group_msg_group_id',
@@ -164,7 +176,8 @@ const MessageService = {
         'group_msg_content'
       )
       .where('group_msg_sent_at', '>', startDate)
-      .where('group_msg_sender', userId)
+      .where('group_members_user_id', userId)
+      .andWhere('group_members_status', 'JOINED')
       .orderBy('group_msg_sent_at', 'asc');
 
     const records = [
@@ -174,11 +187,52 @@ const MessageService = {
 
     records.sort((lhs, rhs) => lhs.sendAt.getTime() - rhs.sendAt.getTime());
 
+    if (records.length > 0) {
+      const lastMessage = records[records.length - 1];
+      await this.setLastReadTime(userId, lastMessage.sendAt);
+    } else {
+      await this.setLastReadTime(userId, new Date());
+    }
+
     return records;
   },
 
   /**
+   * 设置某个用户最后一次拉取历史记录时，拉取的记录中最晚的时间，若没有拉取到任何记录，则该时间为拉取时间
+   *
+   * @param {string} userId 该用户的 ID
+   * @param {Date} date 被设置的时间
+   * @return {Promise<void>}
+   */
+  async setLastReadTime(userId: string, date: Date): Promise<void> {
+    await Database.from('read_status')
+      .where('read_status_user_id', userId)
+      .update('read_status_last_read', date);
+  },
+
+  /**
+   * 获取某个用户最近拉取历史记录的时间
+   *
+   * @param {string} userId 该用户的 ID
+   * @return {Promise<Date>}
+   */
+  async getLastReadTime(userId: string): Promise<Date> {
+    const result = await Database.from('read_status')
+      .column('read_status_last_read')
+      .where('read_status_user_id', userId);
+
+    if (result.length !== 1) {
+      const now = new Date();
+      await this.setLastReadTime(userId, now);
+      return now;
+    }
+
+    return result[0].read_status_last_read;
+  },
+
+  /**
    * 添加一条消息到消息记录中
+   *
    * @param {PrivateMessage | GroupMessage} message 待添加的消息
    * @return {void}
    */

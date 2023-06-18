@@ -1,6 +1,6 @@
 import express, { Request } from 'express';
 import * as ws from 'ws';
-import { verifyToken } from '../util/token';
+import { verifyToken } from '../service/token';
 import logger from '../util/logger';
 import ConnectionService from '../service/connection';
 

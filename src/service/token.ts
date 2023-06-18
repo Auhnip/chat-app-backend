@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-import Config from './config';
+import Config from '../util/config';
 
 const JWT_SECRET = Config.jwtToken.secret;
 

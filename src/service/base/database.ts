@@ -1,6 +1,6 @@
 import Knex from 'knex';
-import Config from './config';
-import logger from './logger';
+import Config from '../../util/config';
+import logger from '../../util/logger';
 
 const { mysql: connection } = Config;
 

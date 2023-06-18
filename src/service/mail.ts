@@ -2,7 +2,7 @@
  * @Author       : wqph
  * @Date         : 2023-03-31 22:09:57
  * @LastEditors  : wqph auhnipuiq@163.com
- * @LastEditTime : 2023-05-12 00:03:19
+ * @LastEditTime : 2023-05-17 16:54:52
  * @FilePath     : \backend\src\service\mail.ts
  * @Description  : 邮件发送服务
  */
@@ -61,6 +61,7 @@ const getMailData = (mailTo: string, code: string): SendMailOptions => {
 
 /**
  * 验证码发送函数
+ * 
  * @param {string} mailTo 需要将验证码发送到的邮箱地址
  * @param {string} code 验证码
  * @return {Promise<void>}

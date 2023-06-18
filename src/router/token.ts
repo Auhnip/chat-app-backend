@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import Joi from 'joi';
 import { StatusError, responseWrapper } from '../util/response_wrapper';
-import { generateAccessToken, verifyToken } from '../util/token';
+import { generateAccessToken, verifyToken } from '../service/token';
 
 const router = Router();
 
@@ -40,7 +40,7 @@ router.post('/refresh', async (req, res) => {
 
   const accessToken = generateAccessToken(userId);
 
-  res.json(responseWrapper('success', { accessToken }));
+  res.json(responseWrapper('success', { userId, accessToken }));
 });
 
 export default router;

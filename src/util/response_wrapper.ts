@@ -25,6 +25,7 @@ type ResponseType = {
 
 /**
  * 根据状态信息和提供的数据，生成响应报文
+ * 
  * @param {StatusMessageType} statusMessage 响应报文的状态信息
  * @param {unknown} data 响应报文需要携带的数据
  * @return {ResponseType} 响应报文对象
